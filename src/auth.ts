@@ -58,6 +58,10 @@ export const {
         session.user.role = token.role as UserRole;
       }
 
+      if (token.defaultProjectId && session.user) {
+        session.user.defaultProjectId = token.defaultProjectId as string;
+      }
+
       if (session.user) {
         session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean;
         session.user.name = token.name;
@@ -81,6 +85,7 @@ export const {
       token.email = existingUser.email;
       token.role = existingUser.role;
       token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
+      token.defaultProjectId = existingUser.defaultProjectId;
 
       return token;
     },

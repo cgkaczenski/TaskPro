@@ -12,6 +12,13 @@ generator client {
 enum UserRole {
   ADMIN
   USER
+  READ_ONLY
+}
+
+enum ProjectRoleTypes {
+  ADMIN
+  USER
+  READ_ONLY
 }
 
 model User {
@@ -25,6 +32,14 @@ model User {
   accounts              Account[]
   isTwoFactorEnabled    Boolean                @default(false)
   twoFactorConfirmation TwoFactorConfirmation?
+  projects              Project[]              @relation("ProjectMembers")
+  leadingProjects       Project[]              @relation("ProjectLeaders")
+  projectRoles          ProjectRole[]
+  defaultProjectId      String?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  Project               Project?               @relation(fields: [projectId], references: [id])
+  projectId             String?
 }
 
 model Account {
@@ -79,4 +94,26 @@ model TwoFactorConfirmation {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId])
+}
+
+model Project {
+  id              String        @id @default(cuid())
+  name            String
+  image           String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  projectLeaderId String
+  projectLeader   User          @relation("ProjectLeaders", fields: [projectLeaderId], references: [id])
+  members         User[]        @relation("ProjectMembers")
+  projectRoles    ProjectRole[]
+  User            User[]
+}
+
+model ProjectRole {
+  id        String           @id @default(cuid())
+  user      User             @relation(fields: [userId], references: [id])
+  userId    String
+  project   Project          @relation(fields: [projectId], references: [id])
+  projectId String
+  role      ProjectRoleTypes
 }

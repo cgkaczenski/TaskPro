@@ -34,6 +34,11 @@ export default auth((req) => {
 
   if (isAuthRoute) {
     if (isLoggedIn) {
+      if (req.auth?.user.defaultProjectId) {
+        return Response.redirect(
+          new URL(`/app/project/${req.auth?.user.defaultProjectId}`, nextUrl)
+        );
+      }
       return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
     }
     return;
