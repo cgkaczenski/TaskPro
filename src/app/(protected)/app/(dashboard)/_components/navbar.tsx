@@ -1,6 +1,6 @@
 "use client";
 
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useProject } from "@/hooks/use-project";
 import { UserButton } from "@/components/auth/user-button";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
@@ -11,34 +11,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Project } from "@prisma/client";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 
-export const Navbar = ({ projects }: { projects: Project[] }) => {
+export const Navbar = () => {
   const router = useRouter();
-  const params = useParams();
-  const [currentProject, setCurrentProject] = useState<Project | null>(null);
-
-  useEffect(() => {
-    const setSelectedProject = async () => {
-      if (params && params.projectId) {
-        const foundProject = projects.find(
-          (project) => project.id === params.projectId
-        );
-        if (foundProject) {
-          setCurrentProject(foundProject);
-        }
-      }
-    };
-
-    setSelectedProject();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { projects, selectedProject } = useProject();
 
   return (
-    <nav className="fixed z-50 top-0 left-0 px-4 w-full h-14 border-b shadow-sm bg-white flex items-center">
+    <nav className="fixed z-50 px-4 w-full h-14 border-b shadow-sm bg-white flex items-center">
       <div className="flex items-center gap-x-4">
         <div className="hidden md:flex">
           <Logo />
@@ -56,19 +37,14 @@ export const Navbar = ({ projects }: { projects: Project[] }) => {
       </div>
       <div className="ml-auto flex items-center gap-x-2">
         <Select
+          value={selectedProject?.id || ""}
           onValueChange={(value) => {
-            const selectedProject = projects.find(
-              (project) => project.id === value
-            );
-            if (selectedProject) {
-              setCurrentProject(selectedProject);
-              router.push(`/app/project/${selectedProject.id}`);
-            }
+            router.push(`/app/project/${value}`);
           }}
         >
           <SelectTrigger className="w-[180px]">
             <SelectValue
-              placeholder={currentProject ? currentProject.name : ""}
+              placeholder={selectedProject ? selectedProject.name : ""}
             />
           </SelectTrigger>
           <SelectContent>

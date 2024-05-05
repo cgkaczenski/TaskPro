@@ -1,5 +1,6 @@
 import { Navbar } from "./_components/navbar";
 import { getAllProjects } from "@/actions/actions";
+import ProjectContextProvider from "@/contexts/project-context-provider";
 import { Project } from "@prisma/client";
 
 const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
@@ -11,8 +12,10 @@ const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
   const projects = result as Project[];
   return (
     <div className="h-full">
-      <Navbar projects={projects} />
-      {children}
+      <ProjectContextProvider data={projects}>
+        <Navbar />
+        {children}
+      </ProjectContextProvider>
     </div>
   );
 };
