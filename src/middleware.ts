@@ -1,5 +1,4 @@
 import NextAuth from "next-auth";
-
 import authConfig from "@/auth.config";
 import {
   DEFAULT_LOGIN_REDIRECT,
@@ -7,16 +6,30 @@ import {
   authRoutes,
   publicRoutes,
 } from "@/routes";
+import { currentUser } from "@/lib/auth";
 
 const { auth } = NextAuth(authConfig);
 
-export default auth((req) => {
+export default auth(async (req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
 
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
+
+  const searchParams = req.nextUrl.searchParams;
+  const redirectOnLogin = searchParams.get("redirectOnLogin");
+  if (redirectOnLogin) {
+    const user = await currentUser();
+    if (user?.defaultProjectId) {
+      return Response.redirect(
+        new URL(`/app/project/${user.defaultProjectId}`, nextUrl)
+      );
+    } else {
+      return Response.redirect(new URL(`/app/project`, nextUrl));
+    }
+  }
 
   if (isApiAuthRoute) {
     if (
@@ -34,11 +47,6 @@ export default auth((req) => {
 
   if (isAuthRoute) {
     if (isLoggedIn) {
-      if (req.auth?.user.defaultProjectId) {
-        return Response.redirect(
-          new URL(`/app/project/${req.auth?.user.defaultProjectId}`, nextUrl)
-        );
-      }
       return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
     }
     return;

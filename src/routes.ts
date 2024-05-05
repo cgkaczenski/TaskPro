@@ -10,4 +10,4 @@ export const authRoutes = [
 
 export const apiAuthPrefix = "/api/auth";
 
-export const DEFAULT_LOGIN_REDIRECT = "/app/project";
+export const DEFAULT_LOGIN_REDIRECT = "/app/project?redirectOnLogin=true";

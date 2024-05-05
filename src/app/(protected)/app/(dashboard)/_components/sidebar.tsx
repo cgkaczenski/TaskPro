@@ -10,7 +10,7 @@ import { NavItem } from "./nav-item";
 import { useEffect, useState } from "react";
 
 export const Sidebar = () => {
-  const { projects, selectedProject, handleChangeProjectById } = useProject();
+  const { projects, selectedProject } = useProject();
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
@@ -42,9 +42,6 @@ export const Sidebar = () => {
             size="icon"
             variant="ghost"
             className="ml-auto"
-            onClick={() => {
-              handleChangeProjectById(null);
-            }}
           >
             <Link href="/app/project">
               <Plus className="h-4 w-4" />
