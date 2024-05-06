@@ -28,3 +28,22 @@ export async function getAllProjects() {
   }
   return projects as Project[];
 }
+
+export async function getAllUsersByProjectId(projectId: string) {
+  const users = await db.user.findMany({
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      role: true,
+    },
+    where: {
+      projects: {
+        some: {
+          id: projectId,
+        },
+      },
+    },
+  });
+  return users;
+}

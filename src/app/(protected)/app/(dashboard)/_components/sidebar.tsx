@@ -32,40 +32,38 @@ export const Sidebar = () => {
   };
 
   return (
-    <>
-      <div>
-        <div className="font-medium text-xs flex items-center mb-1">
-          <span className="pl-4">Projects</span>
-          <Button
-            asChild
-            type="button"
-            size="icon"
-            variant="ghost"
-            className="ml-auto"
-          >
-            <Link href="/app/project">
-              <Plus className="h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
-        <div>
-          <Accordion
-            type="multiple"
-            value={Object.keys(expanded).filter((key) => expanded[key])}
-            className="space-y-2"
-          >
-            {projects.map((project) => (
-              <NavItem
-                key={project.id}
-                isActive={selectedProject?.id === project.id}
-                isExpanded={expanded[project.id]}
-                project={project}
-                onExpand={onExpand}
-              />
-            ))}
-          </Accordion>
-        </div>
+    <div>
+      <div className="font-medium text-xs flex items-center mb-1">
+        <span className="pl-4">Projects</span>
+        <Button
+          asChild
+          type="button"
+          size="icon"
+          variant="ghost"
+          className="ml-auto"
+        >
+          <Link href="/app/project">
+            <Plus className="h-4 w-4" />
+          </Link>
+        </Button>
       </div>
-    </>
+      <div>
+        <Accordion
+          type="multiple"
+          value={Object.keys(expanded).filter((key) => expanded[key])}
+          className="space-y-2"
+        >
+          {projects.map((project) => (
+            <NavItem
+              key={project.id}
+              isActive={selectedProject?.id === project.id}
+              isExpanded={expanded[project.id]}
+              project={project}
+              onExpand={onExpand}
+            />
+          ))}
+        </Accordion>
+      </div>
+    </div>
   );
 };
