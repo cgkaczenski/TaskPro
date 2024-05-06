@@ -1,6 +1,7 @@
 "use client";
 
 import { getAllUsersByProjectId } from "@/actions/actions";
+import { useProject } from "@/hooks/use-project";
 import * as React from "react";
 import {
   ColumnDef,
@@ -13,7 +14,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -31,6 +31,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Spinner } from "@/components/spinner";
 import { useEffect } from "react";
 
 export type User = {
@@ -93,7 +94,9 @@ export const columns: ColumnDef<User>[] = [
 ];
 
 export function UserTable() {
+  const { selectedProject } = useProject();
   const [data, setData] = React.useState<User[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -114,18 +117,30 @@ export function UserTable() {
   });
 
   useEffect(() => {
+    if (!selectedProject) {
+      return;
+    }
     const getUsers = async () => {
-      const result = await getAllUsersByProjectId("ffffbn3xn0000lk111b6hpu8f");
+      const result = await getAllUsersByProjectId(selectedProject.id);
       console.log(result);
       if (!result) {
         return;
       }
       const users = result as User[];
       setData(users);
+      setIsLoading(false);
     };
 
     getUsers();
-  }, []);
+  }, [selectedProject]);
+
+  if (isLoading) {
+    return (
+      <div className="w-full flex items-center justify-center">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full">

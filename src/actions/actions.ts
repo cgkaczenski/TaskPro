@@ -35,7 +35,14 @@ export async function getAllUsersByProjectId(projectId: string) {
       id: true,
       email: true,
       name: true,
-      role: true,
+      projectRoles: {
+        where: {
+          projectId: projectId,
+        },
+        select: {
+          role: true,
+        },
+      },
     },
     where: {
       projects: {
@@ -45,5 +52,9 @@ export async function getAllUsersByProjectId(projectId: string) {
       },
     },
   });
-  return users;
+
+  return users.map((user) => ({
+    ...user,
+    role: user.projectRoles[0]?.role,
+  }));
 }
