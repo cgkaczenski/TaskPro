@@ -38,7 +38,9 @@ function ProjectContextProviderContent({
   >(null);
 
   useEffect(() => {
-    setSelectedProjectId((params?.projectId as Project["id"]) || null);
+    if (params?.projectId) {
+      setSelectedProjectId(params?.projectId as Project["id"]);
+    }
   }, [params?.projectId]);
 
   const selectedProject = projects.find(
