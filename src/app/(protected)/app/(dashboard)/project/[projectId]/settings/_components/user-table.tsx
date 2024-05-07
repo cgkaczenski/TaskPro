@@ -1,6 +1,6 @@
 "use client";
 
-import { getAllUsersByProjectId } from "@/actions/actions";
+import { getAllUsersByProjectId } from "@/actions/user";
 import { useProject } from "@/hooks/use-project";
 import * as React from "react";
 import {

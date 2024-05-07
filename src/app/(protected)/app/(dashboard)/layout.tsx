@@ -1,5 +1,5 @@
 import { Navbar } from "./_components/navbar";
-import { getAllProjects } from "@/actions/actions";
+import { getAllProjects } from "@/actions/project";
 import ProjectContextProvider from "@/contexts/project-context-provider";
 import { Project } from "@prisma/client";
 

@@ -1,9 +1,12 @@
-interface ProtectedLayoutProps {
-  children: React.ReactNode;
-}
+import { Toaster } from "sonner";
 
-const ProtectedLayout = ({ children }: ProtectedLayoutProps) => {
-  return <div>{children}</div>;
+const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <>
+      <Toaster />
+      <div>{children}</div>
+    </>
+  );
 };
 
 export default ProtectedLayout;
