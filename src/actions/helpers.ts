@@ -5,7 +5,7 @@ import { currentUser } from "@/lib/auth";
 
 type PermissionErrorResult = { status: "authorized" } | { error: string };
 
-export const checkPermissions = async (
+export const checkPermissionsByProjectId = async (
   projectId: string
 ): Promise<PermissionErrorResult> => {
   const user = await currentUser();

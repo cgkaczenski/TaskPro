@@ -3,27 +3,20 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
-import { checkPermissions } from "../helper";
+import { checkPermissionsByProjectId } from "../helpers";
 import { CreateList } from "./schema";
 import { InputType, ReturnType } from "./types";
 
-const handler = async (
-  data: InputType,
-  projectId: string
-): Promise<ReturnType> => {
-  const permissionResult = await checkPermissions(projectId);
-  if ("error" in permissionResult) {
-    return { error: permissionResult.error };
-  }
-
+const handler = async (data: InputType): Promise<ReturnType> => {
   const { title, boardId } = data;
-  let list;
-
+  let projectId;
   try {
     const board = await db.board.findUnique({
       where: {
         id: boardId,
-        projectId,
+      },
+      select: {
+        projectId: true,
       },
     });
 
@@ -33,6 +26,21 @@ const handler = async (
       };
     }
 
+    projectId = board.projectId;
+  } catch (error) {
+    return {
+      error: "Failed to create.",
+    };
+  }
+
+  const permissionResult = await checkPermissionsByProjectId(projectId);
+  if ("error" in permissionResult) {
+    return { error: permissionResult.error };
+  }
+
+  let list;
+
+  try {
     const lastList = await db.list.findFirst({
       where: { boardId: boardId },
       orderBy: { order: "desc" },

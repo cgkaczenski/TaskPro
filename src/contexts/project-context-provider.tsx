@@ -12,6 +12,7 @@ type ProjectContextProviderProps = {
 type TProjectContext = {
   projects: Project[];
   selectedProject: Project | undefined;
+  setSelectedProject: (projectId: Project["id"]) => void;
 };
 
 export const ProjectContext = createContext<TProjectContext | null>(null);
@@ -47,8 +48,14 @@ function ProjectContextProviderContent({
     (project) => project.id === selectedProjectId
   );
 
+  const setSelectedProject = (projectId: Project["id"]) => {
+    setSelectedProjectId(projectId);
+  };
+
   return (
-    <ProjectContext.Provider value={{ projects, selectedProject }}>
+    <ProjectContext.Provider
+      value={{ projects, selectedProject, setSelectedProject }}
+    >
       {children}
     </ProjectContext.Provider>
   );

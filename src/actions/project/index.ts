@@ -28,3 +28,32 @@ export async function getAllProjects() {
   }
   return projects as Project[];
 }
+
+export async function getProjectByBoardId(boardId: string) {
+  noStore();
+  const user = await currentUser();
+
+  if (!user) {
+    return null;
+  }
+
+  const project = await db.project.findFirst({
+    where: {
+      boards: {
+        some: {
+          id: boardId,
+        },
+      },
+      members: {
+        some: {
+          id: user.id,
+        },
+      },
+    },
+  });
+
+  if (!project) {
+    return null;
+  }
+  return project as Project;
+}

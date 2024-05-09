@@ -5,7 +5,6 @@ import { MoreHorizontal, X } from "lucide-react";
 
 import { deleteBoard } from "@/actions/delete-board";
 import { useAction } from "@/hooks/use-action";
-import { useProject } from "@/hooks/use-project";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -19,11 +18,6 @@ interface BoardOptionsProps {
 }
 
 export const BoardOptions = ({ id }: BoardOptionsProps) => {
-  const { selectedProject } = useProject();
-  const projectId = selectedProject?.id;
-  if (!projectId) {
-    throw new Error("Project not found");
-  }
   const { execute, isLoading } = useAction(deleteBoard, {
     onError: (error) => {
       toast.error(error);
@@ -31,7 +25,7 @@ export const BoardOptions = ({ id }: BoardOptionsProps) => {
   });
 
   const onDelete = () => {
-    execute({ id }, projectId);
+    execute({ id });
   };
 
   return (

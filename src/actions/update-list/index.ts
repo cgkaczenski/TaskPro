@@ -1,22 +1,20 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { checkPermissionsByProjectId } from "../helpers";
-import { DeleteBoard } from "./schema";
+import { UpdateList } from "./schema";
 import { InputType, ReturnType } from "./types";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const { id } = data;
-  let board;
-  let projectId;
+  const { title, id, boardId } = data;
 
+  let projectId;
   try {
-    board = await db.board.findUnique({
+    const board = await db.board.findUnique({
       where: {
-        id,
+        id: boardId,
       },
       select: {
         projectId: true,
@@ -32,7 +30,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     projectId = board.projectId;
   } catch (error) {
     return {
-      error: "Failed to delete.",
+      error: "Failed to update.",
     };
   }
 
@@ -41,20 +39,26 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     return { error: permissionResult.error };
   }
 
+  let list;
+
   try {
-    board = await db.board.delete({
+    list = await db.list.update({
       where: {
         id,
+        boardId,
+      },
+      data: {
+        title,
       },
     });
   } catch (error) {
     return {
-      error: "Failed to delete.",
+      error: "Failed to update.",
     };
   }
 
-  revalidatePath(`/app/project/${projectId}`);
-  redirect(`/app/project/${projectId}`);
+  revalidatePath(`/app/board/${boardId}`);
+  return { data: list };
 };
 
-export const deleteBoard = createSafeAction(DeleteBoard, handler);
+export const updateList = createSafeAction(UpdateList, handler);

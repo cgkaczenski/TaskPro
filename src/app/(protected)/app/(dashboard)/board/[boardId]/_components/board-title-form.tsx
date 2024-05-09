@@ -7,19 +7,12 @@ import { Button } from "@/components/ui/button";
 import { FormInput } from "@/components/form/form-input";
 import { updateBoard } from "@/actions/update-board";
 import { useAction } from "@/hooks/use-action";
-import { useProject } from "@/hooks/use-project";
 
 interface BoardTitleFormProps {
   data: Board;
 }
 
 export const BoardTitleForm = ({ data }: BoardTitleFormProps) => {
-  const { selectedProject } = useProject();
-  const projectId = selectedProject?.id;
-  if (!projectId) {
-    throw new Error("Project not found");
-  }
-
   const { execute } = useAction(updateBoard, {
     onSuccess: (data) => {
       toast.success(`Board "${data.title}" updated!`);
@@ -52,13 +45,10 @@ export const BoardTitleForm = ({ data }: BoardTitleFormProps) => {
   const onSubmit = (formData: FormData) => {
     const title = formData.get("title") as string;
 
-    execute(
-      {
-        title,
-        id: data.id,
-      },
-      projectId
-    );
+    execute({
+      title,
+      id: data.id,
+    });
   };
 
   const onBlur = () => {

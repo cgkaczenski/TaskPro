@@ -1,6 +1,7 @@
 "use client";
 
 import { useProject } from "@/hooks/use-project";
+import { getProjectByBoardId } from "@/actions/project";
 import { UserButton } from "@/components/auth/user-button";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
@@ -13,12 +14,29 @@ import {
 } from "@/components/ui/select";
 import { FormPopover } from "@/components/form/form-popover";
 import { MobileSidebar } from "./mobile-sidebar";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { Plus } from "lucide-react";
+import { useEffect } from "react";
 
 export const Navbar = () => {
   const router = useRouter();
-  const { projects, selectedProject } = useProject();
+  const params = useParams();
+  const { projects, selectedProject, setSelectedProject } = useProject();
+
+  useEffect(() => {
+    const setSelectedProjectId = async () => {
+      if (!selectedProject && params?.boardId) {
+        const boardId = params.boardId as string;
+        const project = await getProjectByBoardId(boardId);
+        if (project && project.id) {
+          setSelectedProject(project.id);
+        }
+      }
+    };
+
+    setSelectedProjectId();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <nav className="fixed z-50 px-4 w-full h-14 border-b shadow-sm bg-white flex items-center">

@@ -3,27 +3,48 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
-import { checkPermissions } from "../helper";
+import { checkPermissionsByProjectId } from "../helpers";
 import { UpdateBoard } from "./schema";
 import { InputType, ReturnType } from "./types";
 
-const handler = async (
-  data: InputType,
-  projectId: string
-): Promise<ReturnType> => {
-  const permissionResult = await checkPermissions(projectId);
+const handler = async (data: InputType): Promise<ReturnType> => {
+  const { title, id } = data;
+  let projectId;
+
+  try {
+    const board = await db.board.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        projectId: true,
+      },
+    });
+
+    if (!board) {
+      return {
+        error: "Board not found",
+      };
+    }
+
+    projectId = board.projectId;
+  } catch (error) {
+    return {
+      error: "Failed to update.",
+    };
+  }
+
+  const permissionResult = await checkPermissionsByProjectId(projectId);
   if ("error" in permissionResult) {
     return { error: permissionResult.error };
   }
 
-  const { title, id } = data;
   let board;
 
   try {
     board = await db.board.update({
       where: {
         id,
-        projectId,
       },
       data: {
         title,

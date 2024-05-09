@@ -5,7 +5,6 @@ import { Plus, X } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useRef, ElementRef } from "react";
 import { useEventListener, useOnClickOutside } from "usehooks-ts";
-import { useProject } from "@/hooks/use-project";
 import { useAction } from "@/hooks/use-action";
 import { Button } from "@/components/ui/button";
 import { createList } from "@/actions/create-list";
@@ -17,11 +16,6 @@ import { ListWrapper } from "./list-wrapper";
 export const ListForm = () => {
   const router = useRouter();
   const params = useParams();
-  const { selectedProject } = useProject();
-  if (!selectedProject) {
-    throw new Error("Project not found");
-  }
-
   const formRef = useRef<ElementRef<"form">>(null);
   const inputRef = useRef<ElementRef<"input">>(null);
 
@@ -62,13 +56,10 @@ export const ListForm = () => {
     const title = formData.get("title") as string;
     const boardId = formData.get("boardId") as string;
 
-    execute(
-      {
-        title,
-        boardId,
-      },
-      selectedProject?.id
-    );
+    execute({
+      title,
+      boardId,
+    });
   };
 
   if (isEditing) {

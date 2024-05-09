@@ -107,6 +107,7 @@ model Project {
   members         User[]        @relation("ProjectMembers")
   projectRoles    ProjectRole[]
   User            User[]
+  boards          Board[]
 }
 
 model ProjectRole {
@@ -121,6 +122,7 @@ model ProjectRole {
 model Board {
   id        String   @id @default(uuid())
   projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   title     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
