@@ -1,7 +1,34 @@
-const BoardIdPage = () => {
+import { redirect } from "next/navigation";
+import { db } from "@/lib/db";
+import { ListContainer } from "./_components/list-container";
+interface BoardIdPageProps {
+  params: {
+    boardId: string;
+  };
+}
+
+const BoardIdPage = async ({ params }: BoardIdPageProps) => {
+  //Todo: add view permission check
+
+  const lists = await db.list.findMany({
+    where: {
+      boardId: params.boardId,
+    },
+    include: {
+      cards: {
+        orderBy: {
+          order: "asc",
+        },
+      },
+    },
+    orderBy: {
+      order: "asc",
+    },
+  });
+
   return (
-    <div className="w-full m-20">
-      <div className="px-2 md:px-4">Board Id Page</div>
+    <div className="p-4 h-full overflow-x-auto">
+      <ListContainer boardId={params.boardId} data={lists} />
     </div>
   );
 };

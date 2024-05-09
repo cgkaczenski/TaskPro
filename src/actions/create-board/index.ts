@@ -12,7 +12,6 @@ const handler = async (
   projectId: string
 ): Promise<ReturnType> => {
   const permissionResult = await checkPermissions(projectId);
-
   if ("error" in permissionResult) {
     return { error: permissionResult.error };
   }

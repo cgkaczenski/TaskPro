@@ -25,7 +25,7 @@ export const Navbar = () => {
       <MobileSidebar />
       <div className="flex items-center gap-x-4">
         <div className="hidden md:flex">
-          <Logo />
+          <Logo projectId={selectedProject?.id} />
         </div>
         <FormPopover align="start" side="bottom" sideOffset={18}>
           <Button
