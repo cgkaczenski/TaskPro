@@ -1,40 +1,40 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { checkPermissions } from "../helper";
+import { DeleteBoard } from "./schema";
 import { InputType, ReturnType } from "./types";
-import { CreateBoard } from "./schema";
 
 const handler = async (
   data: InputType,
   projectId: string
 ): Promise<ReturnType> => {
   const permissionResult = await checkPermissions(projectId);
-
   if ("error" in permissionResult) {
     return { error: permissionResult.error };
   }
 
-  const { title } = data;
-
+  const { id } = data;
   let board;
+
   try {
-    board = await db.board.create({
-      data: {
-        title,
+    board = await db.board.delete({
+      where: {
+        id,
         projectId,
       },
     });
   } catch (error) {
     return {
-      error: "Failed to create.",
+      error: "Failed to delete.",
     };
   }
 
-  revalidatePath(`/app/board/${board.id}`);
-  return { data: board };
+  revalidatePath(`/app/project/${projectId}`);
+  redirect(`/app/project/${projectId}`);
 };
 
-export const createBoard = createSafeAction(CreateBoard, handler);
+export const deleteBoard = createSafeAction(DeleteBoard, handler);
