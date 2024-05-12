@@ -4,53 +4,26 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
-import { checkPermissionsByProjectId } from "../helpers";
+import { getProjectIdOrThrowPermissionError } from "../helpers";
 import { DeleteBoard } from "./schema";
 import { InputType, ReturnType } from "./types";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
   const { id } = data;
-  let board;
-  let projectId;
-
+  let projectId: string;
   try {
-    board = await db.board.findUnique({
+    projectId = await getProjectIdOrThrowPermissionError(id);
+
+    await db.board.delete({
       where: {
         id,
       },
-      select: {
-        projectId: true,
-      },
     });
-
-    if (!board) {
-      return {
-        error: "Board not found",
-      };
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return { error: error.message };
     }
-
-    projectId = board.projectId;
-  } catch (error) {
-    return {
-      error: "Failed to delete.",
-    };
-  }
-
-  const permissionResult = await checkPermissionsByProjectId(projectId);
-  if ("error" in permissionResult) {
-    return { error: permissionResult.error };
-  }
-
-  try {
-    board = await db.board.delete({
-      where: {
-        id,
-      },
-    });
-  } catch (error) {
-    return {
-      error: "Failed to delete.",
-    };
+    return { error: "An unknown error occurred" };
   }
 
   revalidatePath(`/app/project/${projectId}`);

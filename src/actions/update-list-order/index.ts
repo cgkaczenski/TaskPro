@@ -3,28 +3,31 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
-import { getProjectIdOrThrowPermissionError } from "../helpers";
-import { UpdateList } from "./schema";
+import { UpdateListOrder } from "./schema";
 import { InputType, ReturnType } from "./types";
+import { getProjectIdOrThrowPermissionError } from "../helpers";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const { title, id, boardId } = data;
+  const { items, boardId } = data;
 
-  let list;
+  let lists;
   try {
     const projectId = await getProjectIdOrThrowPermissionError(boardId);
-    list = await db.list.update({
-      where: {
-        id,
-        boardId,
-        board: {
-          projectId,
+    const transaction = items.map((list) =>
+      db.list.update({
+        where: {
+          id: list.id,
+          board: {
+            projectId,
+          },
         },
-      },
-      data: {
-        title,
-      },
-    });
+        data: {
+          order: list.order,
+        },
+      })
+    );
+
+    lists = await db.$transaction(transaction);
   } catch (error: unknown) {
     if (error instanceof Error) {
       return { error: error.message };
@@ -33,7 +36,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   }
 
   revalidatePath(`/app/board/${boardId}`);
-  return { data: list };
+  return { data: lists };
 };
 
-export const updateList = createSafeAction(UpdateList, handler);
+export const updateListOrder = createSafeAction(UpdateListOrder, handler);

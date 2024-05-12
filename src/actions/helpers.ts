@@ -67,3 +67,47 @@ export const checkPermissionsByProjectId = async (
 
   return { status: "authorized" };
 };
+
+const getProjectIdByBoardId = async (
+  boardId: string
+): Promise<string | { error: string }> => {
+  try {
+    const board = await db.board.findUnique({
+      where: {
+        id: boardId,
+      },
+      select: {
+        projectId: true,
+      },
+    });
+
+    if (!board) {
+      return {
+        error: "Board not found",
+      };
+    }
+
+    return board.projectId;
+  } catch (error) {
+    return {
+      error: "Failed to get project id by board id",
+    };
+  }
+};
+
+const handleError = <T>(result: T | { error: string } | null): T => {
+  if (result === null) {
+    throw new Error("Result is null");
+  }
+  if (typeof result === "object" && "error" in result) {
+    throw new Error(result.error);
+  }
+  return result;
+};
+
+export const getProjectIdOrThrowPermissionError = async (boardId: string) => {
+  const projectIdResult = await getProjectIdByBoardId(boardId);
+  const projectId = handleError(projectIdResult);
+  await checkPermissionsByProjectId(projectId).then(handleError);
+  return projectId;
+};
