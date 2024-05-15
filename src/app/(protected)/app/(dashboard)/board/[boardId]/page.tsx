@@ -19,6 +19,9 @@ const BoardIdPage = async ({ params }: BoardIdPageProps) => {
         orderBy: {
           order: "asc",
         },
+        include: {
+          people: true,
+        },
       },
     },
     orderBy: {

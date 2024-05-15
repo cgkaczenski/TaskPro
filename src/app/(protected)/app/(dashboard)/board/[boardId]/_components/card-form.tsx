@@ -71,7 +71,7 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
             id="title"
             onKeyDown={onTextareakeyDown}
             ref={ref}
-            placeholder="Enter a title for this card..."
+            placeholder="Enter a title for this task..."
             errors={fieldErrors}
           />
           <input hidden id="listId" name="listId" value={listId} />
@@ -94,7 +94,7 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
           variant="ghost"
         >
           <Plus className="h-4 w-4 mr-2" />
-          Add a card
+          Add a task
         </Button>
       </div>
     );

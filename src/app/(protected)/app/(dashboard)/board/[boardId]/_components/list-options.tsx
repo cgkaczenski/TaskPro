@@ -84,7 +84,7 @@ export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
           className="rounded-none w-full h-auto p-2 px-5 justify-start font-normal text-sm"
           variant="ghost"
         >
-          Add card...
+          Add task...
         </Button>
         <form action={onCopy}>
           <input hidden name="id" id="id" value={data.id} />

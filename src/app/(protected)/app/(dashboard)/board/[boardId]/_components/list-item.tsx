@@ -34,7 +34,7 @@ export const ListItem = ({ data, index }: ListItemProps) => {
         <li
           {...provided.draggableProps}
           ref={provided.innerRef}
-          className="shrink-0 h-full w-[272px] select-none"
+          className="shrink-0 h-full w-full 2xl:w-10/12 select-none"
         >
           <div
             {...provided.dragHandleProps}
@@ -51,6 +51,16 @@ export const ListItem = ({ data, index }: ListItemProps) => {
                     data.cards.length > 0 ? "mt-2" : "mt-0"
                   )}
                 >
+                  {data.cards.length > 0 && (
+                    <div className="flex items-center space-x-4 border-b border-gray-200 py-2 px-3 text-sm bg-white cursor-default">
+                      <div className="truncate flex-1">Task Name</div>
+                      <div className="truncate flex-1">People</div>
+                      <div className="truncate flex-1">Status</div>
+                      <div className="truncate flex-1">Priority</div>
+                      <div className="truncate flex-1">Start Date</div>
+                      <div className="truncate flex-1">Due Date</div>
+                    </div>
+                  )}
                   {data.cards.map((card, index) => (
                     <CardItem index={index} key={card.id} data={card} />
                   ))}
