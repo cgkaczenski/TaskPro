@@ -151,7 +151,7 @@ export const ListContainer = ({ data, boardId }: ListContainerProps) => {
           <ol
             {...provided.droppableProps}
             ref={provided.innerRef}
-            className="flex-col space-y-3 2xl:ml-52"
+            className="flex-col space-y-3"
           >
             {orderedData.map((list, index) => {
               return <ListItem key={list.id} index={index} data={list} />;

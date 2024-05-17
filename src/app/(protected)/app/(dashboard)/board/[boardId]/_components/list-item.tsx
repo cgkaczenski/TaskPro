@@ -5,7 +5,9 @@ import { ListHeader } from "./list-header";
 import { ElementRef, useRef, useState } from "react";
 import { CardForm } from "./card-form";
 import { CardItem } from "./card-item";
+import { Gantt } from "./gantt";
 import { Draggable, Droppable } from "@hello-pangea/dnd";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
 interface ListItemProps {
@@ -16,6 +18,7 @@ interface ListItemProps {
 export const ListItem = ({ data, index }: ListItemProps) => {
   const textareaRef = useRef<ElementRef<"textarea">>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [selectedTab, setSelectedTab] = useState("list");
 
   const disableEditing = () => {
     setIsEditing(false);
@@ -28,19 +31,25 @@ export const ListItem = ({ data, index }: ListItemProps) => {
     });
   };
 
-  return (
-    <Draggable draggableId={data.id} index={index}>
-      {(provided) => (
-        <li
-          {...provided.draggableProps}
-          ref={provided.innerRef}
-          className="shrink-0 h-full w-full 2xl:w-10/12 select-none"
-        >
-          <div
-            {...provided.dragHandleProps}
-            className="w-full rounded-md bg-[#f1f2f4] shadow-md pb-2"
-          >
-            <ListHeader onAddCard={enableEditing} data={data} />
+  const isDraggable = selectedTab === "list";
+
+  const renderContent = (provided: any) => (
+    <li
+      {...provided.draggableProps}
+      ref={provided.innerRef}
+      className="shrink-0 h-full w-full select-none"
+    >
+      <div
+        {...provided.dragHandleProps}
+        className="w-full rounded-md bg-[#f1f2f4] shadow-md pb-2"
+      >
+        <ListHeader onAddCard={enableEditing} data={data} />
+        <Tabs defaultValue="list" onValueChange={setSelectedTab}>
+          <TabsList className="pt-2 px-2 text-sm font-semibold">
+            <TabsTrigger value="list">List</TabsTrigger>
+            <TabsTrigger value="gantt">Gantt</TabsTrigger>
+          </TabsList>
+          <TabsContent value="list">
             <Droppable droppableId={data.id} type="card">
               {(provided) => (
                 <ol
@@ -75,9 +84,22 @@ export const ListItem = ({ data, index }: ListItemProps) => {
               enableEditing={enableEditing}
               disableEditing={disableEditing}
             />
-          </div>
-        </li>
-      )}
+          </TabsContent>
+          <TabsContent value="gantt">
+            <Gantt data={data.cards} />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </li>
+  );
+
+  return (
+    <Draggable
+      draggableId={data.id}
+      index={index}
+      isDragDisabled={!isDraggable}
+    >
+      {renderContent}
     </Draggable>
   );
 };
