@@ -12,6 +12,7 @@ import { CardWithPeople } from "@/types";
 import { CalendarHeader } from "./calendar-header";
 import Flow from "./flow";
 import { Node } from "reactflow";
+import Empty from "./empty";
 
 interface GanttProps {
   data: CardWithPeople[];
@@ -19,8 +20,13 @@ interface GanttProps {
 
 export const Gantt = ({ data }: GanttProps) => {
   const container = useRef(null);
-  const startDates = data.map((card) => new Date(card.startDate as Date));
+  const startDates = data
+    .map((card) => card.startDate)
+    .filter((startDate) => startDate !== null)
+    .map((startDate) => new Date(startDate as Date));
+
   const earliestStartDate = min(startDates);
+  console.log(earliestStartDate);
   const [currentDate, setCurrentDate] = useState(earliestStartDate);
   const [columnWidth, setColumnWidth] = useState(0);
 
@@ -28,7 +34,7 @@ export const Gantt = ({ data }: GanttProps) => {
     const calculateColumnWidth = () => {
       if (container.current) {
         const containerWidth = (container.current as HTMLElement).clientWidth;
-        const columnCount = 7; // Assuming 7 columns for a week
+        const columnCount = 7; // Assuming 7 columns for each week
         const newColumnWidth = containerWidth / columnCount;
         setColumnWidth(newColumnWidth);
       }
@@ -44,64 +50,46 @@ export const Gantt = ({ data }: GanttProps) => {
   const calculateNodePosition = (
     startDate: Date,
     endDate: Date,
-    index: number,
-    nodes: any[]
+    index: number
   ) => {
     const startWeek = startOfWeek(startDate, { weekStartsOn: 1 });
     const currentWeek = startOfWeek(currentDate, { weekStartsOn: 1 });
     const colStart = differenceInWeeks(startWeek, currentWeek);
-    const nodesInSameWeek = nodes.filter(
-      (node) =>
-        differenceInWeeks(
-          startOfWeek(new Date(node.data.startDate), { weekStartsOn: 1 }),
-          currentWeek
-        ) === colStart
-    );
-    const rowStart = nodesInSameWeek.findIndex(
-      (node) => node.id === nodes[index].id
-    );
-
+    const rowStart = index;
     const endWeek = startOfWeek(endDate, { weekStartsOn: 1 });
     const colEnd = differenceInWeeks(endWeek, currentWeek);
     const colSpan = colEnd - colStart + 1;
 
     return {
-      x: colStart * columnWidth + 5,
+      x: colStart === 0 ? colStart * columnWidth + 5 : colStart * columnWidth,
       y: rowStart * 75 + 10,
-      width: colSpan * columnWidth - 50,
+      width: colSpan * columnWidth - 75,
     };
   };
 
   const nodes = data
     .map((card) => {
-      const startDate = new Date(card.startDate as Date);
-      const endDate = addDays(new Date(card.dueDate as Date), 1);
-      const isEventInPast = endDate < currentDate;
-
-      if (!isEventInPast) {
-        return {
-          id: card.id,
-          data: {
-            label: card.title,
-            startDate: card.startDate,
-          },
-        };
-      }
-      return null;
+      return {
+        id: card.id,
+        data: {
+          label: card.title,
+          startDate: card.startDate,
+          dueDate: card.dueDate,
+        },
+      };
     })
-    .filter((node): node is Node => node !== null);
+    .filter(
+      (node): node is Node =>
+        node?.data.startDate !== null &&
+        node?.data.startDate !== undefined &&
+        node?.data.dueDate !== undefined
+    );
 
   nodes.forEach((node, index) => {
-    if (!node.data || !node.data.startDate) return;
-
-    const card = data.find((card) => card.id === node.id);
-    if (!card || !card.dueDate) return;
-
     const { x, y, width } = calculateNodePosition(
       new Date(node.data.startDate),
-      new Date(card.dueDate),
-      index,
-      nodes
+      new Date(node.data.dueDate),
+      index
     );
 
     node.position = { x, y };
@@ -115,6 +103,10 @@ export const Gantt = ({ data }: GanttProps) => {
   const handleNextWeek = () => {
     setCurrentDate(addWeeks(currentDate, 1));
   };
+
+  if (data.length === 0) {
+    return <Empty />;
+  }
 
   return (
     <div className="flex h-full flex-col">
@@ -164,63 +156,6 @@ export const Gantt = ({ data }: GanttProps) => {
             <div className="sticky left-0 z-10 w-14 flex-none bg-white ring-1 ring-gray-100" />
             <div className="grid flex-auto grid-cols-1 grid-rows-1">
               <Flow nodes={nodes} />
-
-              {/* Events 
-              <ol
-                className="col-start-1 col-end-2 row-start-1 grid grid-cols-1 sm:grid-cols-7 sm:pr-8"
-                style={{
-                  gridTemplateRows: `1.75rem repeat(${rowsNeeded}, minmax(0, 1fr)) auto`,
-                }}
-              >
-                {data.map((card, index) => {
-                  const startDate = new Date(card.startDate as Date);
-                  const dueDate = new Date(card.dueDate as Date);
-                  const startWeek = startOfWeek(startDate, { weekStartsOn: 1 });
-                  const currentWeek = startOfWeek(currentDate, {
-                    weekStartsOn: 1,
-                  });
-
-                  // Calculate the column position based on the start date
-                  const colStart =
-                    Math.floor(
-                      (startWeek.getTime() - currentWeek.getTime()) /
-                        (1000 * 3600 * 24 * 7)
-                    ) + 1;
-
-                  // Check if the event's end date is before the start of the current week
-                  const isEventInPast = dueDate < currentWeek;
-
-                  // Set a fixed number of rows for each event (e.g., 3 rows)
-                  const spanRows = 3 * 24;
-
-                  // Render the event only if it's not in the past
-                  if (!isEventInPast) {
-                    return (
-                      <li
-                        key={index}
-                        className="relative mt-px flex"
-                        style={{
-                          gridColumn: `${colStart} / span 1`,
-                          gridRow: ` span ${spanRows}`,
-                        }}
-                      >
-                        <a
-                          href="#"
-                          className="group absolute inset-1 flex flex-col overflow-y-auto rounded-lg bg-blue-50 p-2 text-xs leading-5 hover:bg-blue-100"
-                        >
-                          <p className="order-1 font-semibold text-blue-700">
-                            {card.title}
-                          </p>
-                        </a>
-                      </li>
-                    );
-                  }
-
-                  // Return null if the event is in the past
-                  return null;
-                })}
-              </ol>
-              */}
             </div>
           </div>
         </div>
