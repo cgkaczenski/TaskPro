@@ -1,11 +1,4 @@
-import {
-  min,
-  max,
-  addWeeks,
-  startOfWeek,
-  differenceInWeeks,
-  addDays,
-} from "date-fns";
+import { min, addWeeks, startOfWeek, differenceInWeeks } from "date-fns";
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { CardWithPeople } from "@/types";
