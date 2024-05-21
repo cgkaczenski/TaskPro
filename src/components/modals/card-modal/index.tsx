@@ -5,6 +5,7 @@ import { CardWithList } from "@/types";
 import { useCardModal } from "@/hooks/use-card-modal";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Header } from "./header";
+import { toast } from "sonner";
 import { useEffect, useState } from "react";
 
 export const CardModal = () => {
@@ -18,12 +19,21 @@ export const CardModal = () => {
       if (id) {
         const card = await getCardById(id);
         if (card) {
-          setCardData(card);
+          if ("error" in card) {
+            setCardData(null);
+            toast.error(card.error || "Failed to get card");
+          } else {
+            setCardData(card);
+          }
+        } else {
+          setCardData(null);
+          toast.error("Failed to get card");
         }
       } else {
         setCardData(null);
       }
     };
+
     getCard();
   }, [id]);
 
