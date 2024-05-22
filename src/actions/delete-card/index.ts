@@ -3,36 +3,28 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
-import { UpdateCard } from "./schema";
+import { DeleteCard } from "./schema";
 import { InputType, ReturnType } from "./types";
 import { getProjectIdOrThrowPermissionError } from "../helpers";
-import { TaskStatus } from "@prisma/client";
-import { Priority } from "@prisma/client";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const { id, boardId, ...values } = data;
-
+  const { id, boardId } = data;
   let card;
   try {
-    await getProjectIdOrThrowPermissionError(boardId);
-    card = await db.card.update({
+    const projectId = await getProjectIdOrThrowPermissionError(boardId);
+    card = await db.card.delete({
       where: {
         id,
         list: {
           board: {
-            id: boardId,
+            projectId,
           },
         },
-      },
-      data: {
-        ...values,
-        status: values.status as TaskStatus,
-        priority: values.priority as Priority,
       },
     });
   } catch (error) {
     return {
-      error: "Failed to update.",
+      error: "Failed to delete.",
     };
   }
 
@@ -40,4 +32,4 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   return { data: card };
 };
 
-export const updateCard = createSafeAction(UpdateCard, handler);
+export const deleteCard = createSafeAction(DeleteCard, handler);

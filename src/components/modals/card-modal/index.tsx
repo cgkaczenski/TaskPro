@@ -5,6 +5,8 @@ import { CardWithList } from "@/types";
 import { useCardModal } from "@/hooks/use-card-modal";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Header } from "./header";
+import { Details } from "./details";
+import { Actions } from "./actions";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 
@@ -43,8 +45,11 @@ export const CardModal = () => {
         {!cardData ? <Header.Skeleton /> : <Header data={cardData} />}
         <div className="grid grid-cols-1 md:grid-cols-4 md:gap-4">
           <div className="col-span-3">
-            <div className="w-full space-y-6"></div>
+            <div className="w-full space-y-6">
+              {!cardData ? <Details.Skeleton /> : <Details data={cardData} />}
+            </div>
           </div>
+          {!cardData ? <Actions.Skeleton /> : <Actions data={cardData} />}
         </div>
       </DialogContent>
     </Dialog>
