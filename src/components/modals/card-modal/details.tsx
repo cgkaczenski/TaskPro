@@ -17,9 +17,10 @@ import { FormDatePicker } from "@/components/form/form-date-picker";
 
 interface DetailsProps {
   data: CardWithList;
+  onUpdate: () => void;
 }
 
-export const Details = ({ data }: DetailsProps) => {
+export const Details = ({ data, onUpdate }: DetailsProps) => {
   const params = useParams();
   const [description, setDescription] = useState(data.description);
   const [status, setStatus] = useState(data.status);
@@ -59,6 +60,7 @@ export const Details = ({ data }: DetailsProps) => {
       setDueDate(data.dueDate);
       toast.success(`Card "${data.title}" updated`);
       disableEditing();
+      onUpdate();
     },
     onError: (error) => {
       toast.error(error);

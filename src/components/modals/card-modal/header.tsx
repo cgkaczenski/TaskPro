@@ -13,15 +13,17 @@ import { FormInput } from "@/components/form/form-input";
 
 interface HeaderProps {
   data: CardWithList;
+  onUpdate: () => void;
 }
 
-export const Header = ({ data }: HeaderProps) => {
+export const Header = ({ data, onUpdate }: HeaderProps) => {
   const params = useParams();
 
   const { execute } = useAction(updateCard, {
     onSuccess: (data) => {
       toast.success(`Renamed to "${data.title}"`);
       setTitle(data.title);
+      onUpdate();
     },
     onError: (error) => {
       toast.error(error);

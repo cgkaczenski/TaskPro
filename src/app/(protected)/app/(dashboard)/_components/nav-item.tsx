@@ -44,11 +44,6 @@ export const NavItem = ({
       icon: <Settings className="h-4 w-4 mr-2" />,
       href: `/app/project/${project.id}/settings`,
     },
-    {
-      label: "Direct Costs",
-      icon: <CreditCard className="h-4 w-4 mr-2" />,
-      href: `/app/project/${project.id}/direct-costs`,
-    },
   ];
 
   const onClick = (href: string) => {

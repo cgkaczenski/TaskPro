@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
+import { ACTION, ENTITY_TYPE } from "@prisma/client";
+import { createAuditLog } from "@/lib/create-audit-log";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { getProjectIdOrThrowPermissionError } from "../helpers";
 import { CreateList } from "./schema";
@@ -12,7 +14,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
 
   let list;
   try {
-    await getProjectIdOrThrowPermissionError(boardId);
+    const projectId = await getProjectIdOrThrowPermissionError(boardId);
     const lastList = await db.list.findFirst({
       where: { boardId: boardId },
       orderBy: { order: "desc" },
@@ -27,6 +29,14 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         boardId,
         order: newOrder,
       },
+    });
+
+    await createAuditLog({
+      projectId: projectId,
+      entityId: list.id,
+      entityTitle: list.title,
+      entityType: ENTITY_TYPE.LIST,
+      action: ACTION.CREATE,
     });
   } catch (error: unknown) {
     if (error instanceof Error) {

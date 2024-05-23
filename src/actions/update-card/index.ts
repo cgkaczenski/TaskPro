@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
+import { ACTION, ENTITY_TYPE } from "@prisma/client";
+import { createAuditLog } from "@/lib/create-audit-log";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { UpdateCard } from "./schema";
 import { InputType, ReturnType } from "./types";
@@ -14,7 +16,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
 
   let card;
   try {
-    await getProjectIdOrThrowPermissionError(boardId);
+    const projectId = await getProjectIdOrThrowPermissionError(boardId);
     card = await db.card.update({
       where: {
         id,
@@ -29,6 +31,14 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         status: values.status as TaskStatus,
         priority: values.priority as Priority,
       },
+    });
+
+    await createAuditLog({
+      projectId: projectId,
+      entityId: card.id,
+      entityTitle: card.title,
+      entityType: ENTITY_TYPE.CARD,
+      action: ACTION.UPDATE,
     });
   } catch (error) {
     return {

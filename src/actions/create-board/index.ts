@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
+import { ACTION, ENTITY_TYPE } from "@prisma/client";
+import { createAuditLog } from "@/lib/create-audit-log";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { checkPermissionsByProjectId } from "../helpers";
 import { InputType, ReturnType } from "./types";
@@ -25,6 +27,14 @@ const handler = async (
         title,
         projectId,
       },
+    });
+
+    await createAuditLog({
+      projectId: projectId,
+      entityId: board.id,
+      entityTitle: board.title,
+      entityType: ENTITY_TYPE.BOARD,
+      action: ACTION.CREATE,
     });
   } catch (error) {
     return {
