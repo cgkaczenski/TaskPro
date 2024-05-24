@@ -13,6 +13,8 @@ type TProjectContext = {
   projects: Project[];
   selectedProject: Project | undefined;
   setSelectedProject: (projectId: Project["id"]) => void;
+  addProject: (project: Project) => void;
+  removeProject: (projectId: Project["id"]) => void;
 };
 
 export const ProjectContext = createContext<TProjectContext | null>(null);
@@ -41,6 +43,8 @@ function ProjectContextProviderContent({
   useEffect(() => {
     if (params?.projectId) {
       setSelectedProjectId(params?.projectId as Project["id"]);
+    } else if (window.location.pathname.includes("project")) {
+      setSelectedProjectId(null);
     }
   }, [params?.projectId]);
 
@@ -52,9 +56,25 @@ function ProjectContextProviderContent({
     setSelectedProjectId(projectId);
   };
 
+  const addProject = (project: Project) => {
+    setProjects((prevProjects) => [...prevProjects, project]);
+  };
+
+  const removeProject = (projectId: Project["id"]) => {
+    setProjects((prevProjects) =>
+      prevProjects.filter((project) => project.id !== projectId)
+    );
+  };
+
   return (
     <ProjectContext.Provider
-      value={{ projects, selectedProject, setSelectedProject }}
+      value={{
+        projects,
+        selectedProject,
+        setSelectedProject,
+        addProject,
+        removeProject,
+      }}
     >
       {children}
     </ProjectContext.Provider>

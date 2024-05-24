@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { DeleteProjectModal } from "@/components/modals/delete-project-modal";
 
-import { CardModal } from "@/components/modals/card-modal";
-
-export const ModalProvider = () => {
+export const DeleteProjectProvider = () => {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -17,7 +16,7 @@ export const ModalProvider = () => {
 
   return (
     <>
-      <CardModal />
+      <DeleteProjectModal />
     </>
   );
 };

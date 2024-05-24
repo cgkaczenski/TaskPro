@@ -5,9 +5,14 @@ import { Sidebar } from "./_components/sidebar";
 import { Members } from "./_components/members";
 import { Card, CardContent, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { TriangleAlertIcon } from "lucide-react";
+import { useParams } from "next/navigation";
+import { useDeleteProjectModal } from "@/hooks/use-delete-project-modal";
 
 const SettingsPage = () => {
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(2);
+  const params = useParams();
+  const modal = useDeleteProjectModal();
 
   const getHeader = () => {
     switch (activeIndex) {
@@ -29,7 +34,7 @@ const SettingsPage = () => {
       case 1:
         return "Invitations";
       case 2:
-        return "Settings";
+        return "Your project settings";
       default:
         return "View and manage your team members";
     }
@@ -60,7 +65,26 @@ const SettingsPage = () => {
             {(activeIndex === 0 || activeIndex === 1) && (
               <Members onClick={handleClick} activeIndex={activeIndex} />
             )}
-            {activeIndex === 2 && <p>Settings</p>}
+            {activeIndex === 2 && (
+              <div className="text-center">
+                <TriangleAlertIcon className="mx-auto h-12 w-12 text-red-500" />
+                <h3 className="mt-2 text-sm font-semibold text-gray-900">
+                  Danger!
+                </h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Delete your project. This cannot be undone.
+                </p>
+                <div className="mt-6">
+                  <button
+                    type="button"
+                    className="inline-flex items-center rounded-md bg-red-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+                    onClick={() => modal.onOpen(params.projectId as string)}
+                  >
+                    Delete project
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

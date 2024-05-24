@@ -12,9 +12,16 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { LogoutButton } from "@/components/auth/logout-button";
+import { useRouter } from "next/navigation";
+import { Plus } from "lucide-react";
 
 export const UserButton = () => {
   const user = useCurrentUser();
+  const router = useRouter();
+
+  const newProject = () => {
+    router.push("/app/project");
+  };
 
   return (
     <DropdownMenu>
@@ -27,6 +34,12 @@ export const UserButton = () => {
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-40" align="end">
+        <span onClick={newProject}>
+          <DropdownMenuItem>
+            <Plus className="mr-2 h-4 w-4" />
+            <span>New Project</span>
+          </DropdownMenuItem>
+        </span>
         <LogoutButton>
           <DropdownMenuItem>
             <ExitIcon className="h-4 w-4 mr-2" />
