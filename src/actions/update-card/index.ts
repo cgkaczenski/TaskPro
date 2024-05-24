@@ -28,8 +28,10 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       },
       data: {
         ...values,
-        status: values.status as TaskStatus,
-        priority: values.priority as Priority,
+        status: values.status ? (values.status as TaskStatus) : null,
+        priority: values.priority ? (values.priority as Priority) : null,
+        startDate: values.startDate ? new Date(values.startDate) : null,
+        dueDate: values.dueDate ? new Date(values.dueDate) : null,
       },
     });
 

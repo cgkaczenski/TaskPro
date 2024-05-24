@@ -72,7 +72,7 @@ export const Details = ({ data, onUpdate }: DetailsProps) => {
     const status = formData.get("status") as string;
     const priority = formData.get("priority") as string;
     const timeline = formData.get("timeline") as string;
-    const timelineJSON = JSON.parse(timeline);
+    const timelineJSON = timeline ? JSON.parse(timeline) : null;
     const boardId = params.boardId as string;
 
     execute({
@@ -80,8 +80,8 @@ export const Details = ({ data, onUpdate }: DetailsProps) => {
       description,
       status,
       priority,
-      startDate: new Date(timelineJSON.from),
-      dueDate: new Date(timelineJSON.to),
+      startDate: timelineJSON ? new Date(timelineJSON.from) : undefined,
+      dueDate: timelineJSON ? new Date(timelineJSON.to) : undefined,
       boardId,
     });
   };
@@ -133,8 +133,8 @@ export const Details = ({ data, onUpdate }: DetailsProps) => {
               label="Timeline"
               className="w-full mt-2"
               defaultValue={{
-                from: (data.startDate as Date) || new Date(),
-                to: (data.dueDate as Date) || new Date(),
+                from: data.startDate as Date,
+                to: data.dueDate as Date,
               }}
               errors={fieldErrors}
             />
