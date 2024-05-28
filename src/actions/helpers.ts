@@ -48,19 +48,6 @@ export const checkPermissionsByProjectId = async (
     if (!project) {
       return { error: "Project not found." };
     }
-
-    const isUserAuthorized = project.members.some(
-      (member) =>
-        member.id === user.id &&
-        (member.role === "ADMIN" ||
-          member.projectRoles.some(
-            (role) => role.role === "ADMIN" || role.role === "USER"
-          ))
-    );
-
-    if (!isUserAuthorized) {
-      return { error: "Unauthorized" };
-    }
   } catch (error) {
     return { error: "Error checking permissions." };
   }

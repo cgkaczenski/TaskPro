@@ -1,6 +1,6 @@
 "use client";
+
 import { useFormStatus } from "react-dom";
-import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { FormErrors } from "./form-errors";
@@ -28,88 +28,84 @@ interface FormDatePickerProps {
   defaultValue?: DateRange;
 }
 
-export const FormDatePicker = forwardRef<
-  HTMLButtonElement,
-  FormDatePickerProps
->(
-  ({
-    id,
-    label,
-    placeholder,
-    disabled,
-    errors,
-    onDateChange,
-    className,
-    defaultValue,
-  }) => {
-    const { pending } = useFormStatus();
-    const [date, setDate] = React.useState<DateRange | undefined>(defaultValue);
+export const FormDatePicker = ({
+  id,
+  label,
+  placeholder,
+  disabled,
+  errors,
+  onDateChange,
+  className,
+  defaultValue,
+}: FormDatePickerProps) => {
+  const { pending } = useFormStatus();
+  const [date, setDate] = React.useState<DateRange | undefined>(defaultValue);
 
-    const handleDateChange = (dateRange: DateRange | undefined) => {
-      setDate(dateRange);
-      onDateChange?.(dateRange);
-    };
+  const handleDateChange = (dateRange: DateRange | undefined) => {
+    setDate(dateRange);
+    onDateChange?.(dateRange);
+  };
 
-    return (
-      <div className="space-y-2 w-full">
-        <div className="space-y-1 w-full">
-          {label ? (
-            <Label
-              htmlFor={id}
-              className="text-xs font-semibold text-neutral-700"
+  const formatDate = (date: Date | undefined) => {
+    return date ? format(date, "LLL dd, y") : "";
+  };
+
+  return (
+    <div className="space-y-2 w-full">
+      <div className="space-y-1 w-full">
+        {label ? (
+          <Label
+            htmlFor={id}
+            className="text-xs font-semibold text-neutral-700"
+          >
+            {label}
+          </Label>
+        ) : null}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              id={id}
+              variant={"outline"}
+              className={cn(
+                "w-[300px] justify-start text-left font-normal",
+                !date && "text-muted-foreground",
+                className
+              )}
+              aria-describedby={`${id}-error`}
+              disabled={pending || disabled}
             >
-              {label}
-            </Label>
-          ) : null}
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                id={id}
-                variant={"outline"}
-                className={cn(
-                  "w-[300px] justify-start text-left font-normal",
-                  !date && "text-muted-foreground",
-                  className
-                )}
-                aria-describedby={`${id}-error`}
-                disabled={pending || disabled}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {date?.from ? (
-                  date.to ? (
-                    <>
-                      {format(date.from, "LLL dd, y")} -{" "}
-                      {format(date.to, "LLL dd, y")}
-                    </>
-                  ) : (
-                    format(date.from, "LLL dd, y")
-                  )
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {date?.from ? (
+                date.to ? (
+                  <>
+                    {formatDate(date.from)} - {formatDate(date.to)}
+                  </>
                 ) : (
-                  <span>{placeholder}</span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                initialFocus
-                mode="range"
-                defaultMonth={date?.from}
-                selected={date}
-                onSelect={handleDateChange}
-                numberOfMonths={2}
-              />
-            </PopoverContent>
-          </Popover>
-          <input
-            type="hidden"
-            name={id}
-            value={date ? JSON.stringify(date) : ""}
-          />
-        </div>
-        <FormErrors id={id} errors={errors} />
+                  formatDate(date.from)
+                )
+              ) : (
+                <span>{placeholder}</span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              initialFocus
+              mode="range"
+              defaultMonth={date?.from}
+              selected={date}
+              onSelect={handleDateChange}
+              numberOfMonths={2}
+            />
+          </PopoverContent>
+        </Popover>
+        <input
+          type="hidden"
+          name={id}
+          value={date ? JSON.stringify(date) : ""}
+        />
       </div>
-    );
-  }
-);
-
-FormDatePicker.displayName = "FormDatePicker";
+      <FormErrors id={id} errors={errors} />
+    </div>
+  );
+};

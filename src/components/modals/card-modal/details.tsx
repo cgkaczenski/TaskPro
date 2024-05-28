@@ -29,14 +29,8 @@ export const Details = ({ data, onUpdate }: DetailsProps) => {
   const [dueDate, setDueDate] = useState(data.dueDate);
   const [isEditing, setIsEditing] = useState(false);
 
-  const formRef = useRef<ElementRef<"form">>(null);
-  const textareaRef = useRef<ElementRef<"textarea">>(null);
-
   const enableEditing = () => {
     setIsEditing(true);
-    setTimeout(() => {
-      textareaRef.current?.focus();
-    });
   };
 
   const disableEditing = () => {
@@ -72,7 +66,20 @@ export const Details = ({ data, onUpdate }: DetailsProps) => {
     const status = formData.get("status") as string;
     const priority = formData.get("priority") as string;
     const timeline = formData.get("timeline") as string;
-    const timelineJSON = timeline ? JSON.parse(timeline) : null;
+
+    let startDate: Date | undefined;
+    let dueDate: Date | undefined;
+
+    if (timeline) {
+      const timelineJSON = JSON.parse(timeline);
+      if (timelineJSON.from !== null) {
+        startDate = new Date(timelineJSON.from);
+      }
+      if (timelineJSON.to !== null) {
+        dueDate = new Date(timelineJSON.to);
+      }
+    }
+
     const boardId = params.boardId as string;
 
     execute({
@@ -80,8 +87,8 @@ export const Details = ({ data, onUpdate }: DetailsProps) => {
       description,
       status,
       priority,
-      startDate: timelineJSON ? new Date(timelineJSON.from) : undefined,
-      dueDate: timelineJSON ? new Date(timelineJSON.to) : undefined,
+      startDate,
+      dueDate,
       boardId,
     });
   };
@@ -92,7 +99,7 @@ export const Details = ({ data, onUpdate }: DetailsProps) => {
 
       <div className="w-full">
         {isEditing ? (
-          <form action={onSubmit} ref={formRef} className="space-y-2">
+          <form action={onSubmit} className="space-y-2">
             <FormTextarea
               id="description"
               className="w-full mt-2"
@@ -100,8 +107,8 @@ export const Details = ({ data, onUpdate }: DetailsProps) => {
               label="Description"
               defaultValue={description || undefined}
               errors={fieldErrors}
-              ref={textareaRef}
             />
+
             <FormSelect
               id="status"
               label="Status"
