@@ -1,4 +1,5 @@
 "use server";
+
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
@@ -8,10 +9,24 @@ import { currentUser } from "@/lib/auth";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
   const { name } = data;
-  const user = await currentUser();
+  const userSession = await currentUser();
+
+  if (!userSession) {
+    return { error: "Unauthorized" };
+  }
+
+  const user = await db.user.findUnique({
+    where: {
+      id: userSession?.id,
+    },
+  });
 
   if (!user || (user.role !== "USER" && user.role !== "ADMIN")) {
     return { error: "Unauthorized" };
+  }
+
+  if (!user.currentTeamId) {
+    return { error: "You need to be part of a team to create a project." };
   }
 
   let project;
@@ -24,6 +39,9 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         },
         members: {
           connect: { id: user.id },
+        },
+        Team: {
+          connect: { id: user.currentTeamId },
         },
       },
     });

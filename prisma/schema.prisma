@@ -21,6 +21,12 @@ enum ProjectRoleTypes {
   READ_ONLY
 }
 
+enum TeamRole {
+  ADMIN
+  USER
+  READ_ONLY
+}
+
 enum TaskStatus {
   NOT_STARTED
   WORKING_ON_IT
@@ -40,19 +46,46 @@ model User {
   emailVerified         DateTime?
   image                 String?
   password              String?
-  role                  UserRole               @default(ADMIN)
+  role                  UserRole               @default(USER)
   accounts              Account[]
   isTwoFactorEnabled    Boolean                @default(false)
   twoFactorConfirmation TwoFactorConfirmation?
   projects              Project[]              @relation("ProjectMembers")
   leadingProjects       Project[]              @relation("ProjectLeaders")
   projectRoles          ProjectRole[]
-  defaultProjectId      String?
+  currentProjectId      String?
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
   Project               Project?               @relation(fields: [projectId], references: [id])
   projectId             String?
   cards                 Card[]
+  currentTeamId         String?
+  teamMemberships       TeamMember[]           @relation("UserTeamMemberships")
+  teams                 Team[]
+}
+
+model Team {
+  id                String       @id @default(cuid())
+  name              String
+  image             String?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  teamLeaderId      String
+  teamLeader        User         @relation(fields: [teamLeaderId], references: [id])
+  teamMemberships   TeamMember[] @relation("TeamMemberships")
+  projects          Project[]
+  personalWorkspace Boolean      @default(false)
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  user      User     @relation("UserTeamMemberships", fields: [userId], references: [id])
+  userId    String
+  team      Team     @relation("TeamMemberships", fields: [teamId], references: [id])
+  teamId    String
+  role      TeamRole
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Account {
@@ -121,6 +154,8 @@ model Project {
   projectRoles    ProjectRole[]
   User            User[]
   boards          Board[]
+  Team            Team          @relation(fields: [teamId], references: [id])
+  teamId          String
 }
 
 model ProjectRole {

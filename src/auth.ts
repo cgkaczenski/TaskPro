@@ -28,10 +28,50 @@ export const {
   },
   callbacks: {
     async signIn({ user, account }) {
-      if (account?.provider !== "credentials") return true;
-
       const userId = user.id as string;
       const existingUser = await getUserById(userId);
+
+      if (existingUser && !existingUser?.currentTeamId) {
+        const exisitingTeam = await db.team.findFirst({
+          where: { personalWorkspace: true, teamLeaderId: userId },
+        });
+
+        if (exisitingTeam) {
+          await db.user.update({
+            where: { id: userId },
+            data: {
+              currentTeamId: exisitingTeam.id,
+            },
+          });
+        } else {
+          const defaultTeamName = `${existingUser.name}-personal-workspace`;
+          const defaultTeam = await db.team.create({
+            data: {
+              name: defaultTeamName,
+              teamLeaderId: userId,
+              personalWorkspace: true,
+              teamMemberships: {
+                create: {
+                  user: {
+                    connect: {
+                      id: userId,
+                    },
+                  },
+                  role: "ADMIN",
+                },
+              },
+            },
+          });
+          await db.user.update({
+            where: { id: userId },
+            data: {
+              currentTeamId: defaultTeam.id,
+            },
+          });
+        }
+      }
+
+      if (account?.provider !== "credentials") return true;
 
       if (!existingUser?.emailVerified) return false;
 
@@ -85,7 +125,7 @@ export const {
       token.email = existingUser.email;
       token.role = existingUser.role;
       token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
-      token.defaultProjectId = existingUser.defaultProjectId;
+      token.defaultProjectId = existingUser.currentProjectId;
 
       return token;
     },
