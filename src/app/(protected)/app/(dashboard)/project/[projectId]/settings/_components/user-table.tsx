@@ -122,7 +122,6 @@ export function UserTable() {
     }
     const getUsers = async () => {
       const result = await getAllUsersByProjectId(selectedProject.id);
-      console.log(result);
       if (!result) {
         return;
       }

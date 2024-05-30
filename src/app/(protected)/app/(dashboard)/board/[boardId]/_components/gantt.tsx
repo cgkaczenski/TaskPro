@@ -19,7 +19,6 @@ export const Gantt = ({ data }: GanttProps) => {
     .map((startDate) => new Date(startDate as Date));
 
   const earliestStartDate = min(startDates);
-  console.log(earliestStartDate);
   const [currentDate, setCurrentDate] = useState(earliestStartDate);
   const [columnWidth, setColumnWidth] = useState(0);
 
